@@ -1,5 +1,5 @@
 #!/bin/sh
-# Map caps key to esc and ctrl
+
 xmodmap -e "clear Lock"
 xmodmap -e "keycode 66 = Control_L"
 xmodmap -e "add Control = Control_L"

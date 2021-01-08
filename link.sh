@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Links all files in ~/dotfiles folder to their respective position
 
-DOT=$HOME/dotfiles
+DOT=$HOME/dev/dotfiles
 ZSH=${ZDOTDIR:-$HOME}
 
 mkdir -p $ZSH
@@ -13,7 +13,7 @@ ln -sf $DOT/mono.vim $HOME/.vim/colors/
 ln -sf $DOT/darcula.vim $HOME/.vim/plugged/lightline.vim/autoload/lightline/colorscheme/
 ln -sf $DOT/xmonad.hs $HOME/.xmonad
 
-home=(.aliases .config .p10k.zsh .tmux.conf .xinitrc .Xresources .XCompose .vimrc)
+home=(.aliases .p10k.zsh .tmux.conf .xinitrc .Xresources .XCompose .vimrc)
 for f in ${home[@]}; do
     ln -sf $DOT/$f $HOME
 done
