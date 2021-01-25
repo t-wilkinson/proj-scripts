@@ -158,21 +158,21 @@ install_dotfiles() (
     $HOME/dev/scripts/link.sh
 )
 
-install_cron() (
-    echo CRON.D - BACKUP
+#install_cron() (
+#    echo CRON.D - BACKUP
 
-    mkdir -p /etc/cron.d
-    sudo tee /etc/cron.d/backup << EOF > /dev/null
-#!/bin/sh
-DAY=$(date +%A)
-if [ -e /mnt/backup/incr/$DAY ] ; then
-    rm -rf /mnt/backup/incr/$DAY
-fi
-h="/home/trey"
-rsync -aAXv --delete --quiet --inplace --exclude={"/nix/*","/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/lost+found","$h/.cache","$h/.npm","$h/.stack","$h/.mu","$h/.mail","$h/.cabal"} --backup --backup-dir=/mnt/backup/incr/$DAY / /mnt/backup/full/
-EOF
-    sudo chmod +x /etc/cron.d/backup
-)
+#    mkdir -p /etc/cron.d
+#    sudo tee /etc/cron.d/backup << EOF > /dev/null
+##!/bin/sh
+#DAY=$(date +%A)
+#if [ -e /mnt/backup/incr/$DAY ] ; then
+#    rm -rf /mnt/backup/incr/$DAY
+#fi
+#h="/home/trey"
+#rsync -aAXv --delete --quiet --inplace --exclude={"/nix/*","/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/lost+found","$h/.cache","$h/.npm","$h/.stack","$h/.mu","$h/.mail","$h/.cabal"} --backup --backup-dir=/mnt/backup/incr/$DAY / /mnt/backup/full/
+#EOF
+#    sudo chmod +x /etc/cron.d/backup
+#)
 
 while [[ $# > 0 ]]; do
     case $1 in
