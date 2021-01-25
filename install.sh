@@ -4,28 +4,45 @@
 
 set -e
 
-# pacstrap base base-devel linux-firmware neovim vi git wpa_supplicant sudo
-# usermod -aG audio,video,wheel trey
-# xmonad --recompile
+# pacstrap base base-devel linux linux-headers linux-firmware neovim vi git wpa_supplicant netctl dkms
+
+# virtualbox virtualbox-host-dkms-arch xf86-video-vmware
+# yay -Syu
 
 yays() {
     yay -S --noconfirm "$@"
 }
 
-while [[ $# > 0 ]]; do
-    install-$1
-    shift
-done
+install_useradd() (
+    echo USERADD
 
-install-nix() (
+    echo -n 'username: '
+    read user
+
+    useradd -m $user
+    passwd $user
+)
+
+install_usermod() (
+    echo USERMOD
+
+    echo -n 'username: '
+    read user
+    usermod -aG audio,video,wheel $user
+)
+
+install_yay() (
+    echo YAY
+    (cd /tmp && git clone https://aur.archlinux.org/yay.git && cd yay && makepkg -si)
+)
+
+install_nix() (
     echo NIX
     curl -L https://nixos.org/nix/install | sh
 )
 
-install-yay() (
-    echo YAY + PACKAGES
-
-    (cd /tmp && git clone https://aur.archlinux.org/yay.git && cd yay && makepkg -si)
+install_packages() (
+    echo PACKAGES
 
     echo speed up mirrors
     yays pacman-contrib
@@ -33,9 +50,6 @@ install-yay() (
 
     echo important stuff
     yays xorg xorg-server xorg-xinit nvidia intel-ucode xf86-video-intel
-
-    echo awesome tools
-    yays fd ripgrep fzf inxi zsh neovim openssh bat tmux
 
     echo system info
     yays acpi parted lsof lshw dmidecode neofetch
@@ -46,32 +60,49 @@ install-yay() (
     echo network
     yays iperf3 arp-scan iw bind-tools nmap tcpdump
 
-    echo xmonad
-    yays xmonad xmonad-contrib
+    echo awesome tools
+    yays fd ripgrep fzf inxi zsh neovim openssh bat tmux
 
     echo fonts
-    yays ttf-fira-code
+    yays ttf-fira-code nerd-fonts-complete
+
+    echo security
+    yays pass gpg
 
     echo development
-    yays ghc
-    yays python python-pip npm
+    yays ghc ghc-static python python-pip npm
 
     echo gui
     yays xclip xsel xcape xbanish notification-daemon
     yays rofi inkscape qutebrowser picom feh
     yays zathura zathura-pdf-mupdf zathura-ps zathura-cb zathura-djvu
 
-    echo latex
-    yays texlive-bin texlive-core texlive-most
+    # echo latex
+    # yays texlive-bin texlive-core texlive-most
 
     echo web
     yays nginx
+
+    echo audio
+    yays alsa-utils pulseaudio pulseaudio-alsa pulseaudio-jack ponymix
+    # pulseaudio --start
 
     echo misc
     yays mpv youtube-dl zip unzip brotli
 )
 
-install-nvidia() (
+install_kitty() (
+    echo KITTY
+    curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
+)
+
+install_xmonad() (
+    echo XMONAD
+    yays xmonad xmonad-contrib
+    xmonad --recompile
+)
+
+install_nvidia() (
     echo NVIDIA
 
     cat << EOF > /etc/X11/xorg.conf.d/10-nvidia-drm-outputclass.conf
@@ -93,14 +124,14 @@ EndSection
 EOF
 )
 
-install-vim-plug() (
+install_vimplug() (
     echo Vim Plug
 
     sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs \
           https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
 )
 
-install-zprezto() (
+install_zprezto() (
     echo zprezto
 
     zsh << EOF
@@ -113,7 +144,7 @@ chsh -s /bin/zsh
 EOF
 )
 
-install-dotfiles() (
+install_dotfiles() (
     echo prepare dotfiles
 
     cd $HOME/dev
@@ -122,13 +153,11 @@ install-dotfiles() (
     $HOME/dev/scripts/link.sh
 )
 
-install-cron() (
+install_cron() (
     echo CRON.D - BACKUP
 
     mkdir -p /etc/cron.d
-    touch /etc/cron.d/backup
-    chmod +x /etc/cron.d/backup
-    cat << EOF >> /etc/cron.d/backup
+    sudo tee /etc/cron.d/backup << EOF > /dev/null
 #!/bin/sh
 DAY=$(date +%A)
 if [ -e /mnt/backup/incr/$DAY ] ; then
@@ -137,4 +166,19 @@ fi
 h="/home/trey"
 rsync -aAXv --delete --quiet --inplace --exclude={"/nix/*","/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/lost+found","$h/.cache","$h/.npm","$h/.stack","$h/.mu","$h/.mail","$h/.cabal"} --backup --backup-dir=/mnt/backup/incr/$DAY / /mnt/backup/full/
 EOF
+    sudo chmod +x /etc/cron.d/backup
 )
+
+while [[ $# > 0 ]]; do
+    case $1 in
+        all)
+            for func in $(declare -F | grep install_ | sed -e 's/^.*install_\(\w*\)$/\1/'); do
+                install_$func
+            done
+            exit 0
+            ;;
+        *) install_$1;;
+    esac
+    shift
+done
+
