@@ -4,14 +4,14 @@
 
 set -e
 
-# pacstrap base base-devel linux linux-headers linux-firmware neovim vi git wpa_supplicant netctl dkms
-
-# virtualbox virtualbox-host-dkms-arch xf86-video-vmware
-# yay -Syu
 
 yays() {
     yay -S --noconfirm "$@"
 }
+
+install_core() (
+    sudo pacman -S base base-devel linux linux-headers linux-firmware neovim vi git wpa_supplicant netctl dkms
+)
 
 install_useradd() (
     echo USERADD
@@ -89,6 +89,11 @@ install_packages() (
 
     echo misc
     yays mpv youtube-dl zip unzip brotli
+
+    echo virtualbox
+    virtualbox virtualbox-host-dkms-arch xf86-video-vmware
+
+    echo 'you might want to "yay -Syu"'
 )
 
 install_kitty() (
@@ -171,8 +176,16 @@ EOF
 
 while [[ $# > 0 ]]; do
     case $1 in
+        -h)
+            echo -n 'OPTIONS: '
+            for func in $(declare -F | grep install_ | tac | sed -e 's/^.*install_\(\w*\)$/\1/'); do
+                echo -n "$func, "
+            done
+            echo $'\b\b'"   "
+            exit 0
+            ;;
         all)
-            for func in $(declare -F | grep install_ | sed -e 's/^.*install_\(\w*\)$/\1/'); do
+            for func in $(declare -F | grep install_ | tac | sed -e 's/^.*install_\(\w*\)$/\1/'); do
                 install_$func
             done
             exit 0
