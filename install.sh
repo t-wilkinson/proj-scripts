@@ -49,7 +49,7 @@ install_packages() (
     curl -s "https://www.archlinux.org/mirrorlist/?country=US&protocol=https&use_mirror_status=on" | sed -e 's/^#Server/Server/' -e '/^#/d' | rankmirrors -n 5 -
 
     echo important stuff
-    yays xorg xorg-server xorg-xinit nvidia intel-ucode xf86-video-intel
+    yays xorg xorg-server xorg-xinit intel-ucode xf86-video-intel nvidia nvidia-utils nvidia-dkms
 
     echo system info
     yays acpi parted lsof lshw dmidecode neofetch
@@ -58,7 +58,7 @@ install_packages() (
     yays openssh bash-completion cronie man-pages usbutils htop strace rsync tree
 
     echo network
-    yays iperf3 arp-scan iw bind-tools nmap tcpdump
+    yays iperf3 arp-scan iw bind-tools nmap tcpdump ufw inetutils
 
     echo awesome tools
     yays fd ripgrep fzf inxi zsh neovim openssh bat tmux
@@ -70,7 +70,9 @@ install_packages() (
     yays pass gpg
 
     echo development
-    yays ghc ghc-static python python-pip npm
+    yays ghc ghc-static python python-pip npm inotify-tools
+    yays arduino arduino-cli arduino-docs arduino-avr-core
+    arduino-cli core install arduino:avr
 
     echo gui
     yays xclip xsel xcape xbanish notification-daemon
@@ -81,17 +83,20 @@ install_packages() (
     # yays texlive-bin texlive-core texlive-most
 
     echo web
-    yays nginx
+    yays nginx ngrok
 
     echo audio
     yays alsa-utils pulseaudio pulseaudio-alsa pulseaudio-jack ponymix
     # pulseaudio --start
 
     echo misc
-    yays mpv youtube-dl zip unzip brotli
+    yays mpv youtube-dl zip unzip brotli pdfjs
 
     echo virtualbox
-    virtualbox virtualbox-host-dkms-arch xf86-video-vmware
+    yays virtualbox virtualbox-host-dkms-arch xf86-video-vmware
+
+    echo cuda
+    yays -S cuda cuda-tools # python-pytorch-cuda might be necessary to install as well
 
     echo 'you might want to "yay -Syu"'
 )
