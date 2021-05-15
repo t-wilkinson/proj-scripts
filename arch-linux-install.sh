@@ -10,7 +10,7 @@ yays() {
 }
 
 install_core() (
-    sudo pacman -S base base-devel linux linux-headers linux-firmware neovim vi git wpa_supplicant netctl dkms
+    sudo pacman -S base base-devel linux linux-headers linux-firmware neovim vi git wpa_supplicant netctl dkms dialog dhcpcd
 )
 
 install_useradd() (
