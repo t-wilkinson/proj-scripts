@@ -1,0 +1,26 @@
+#!/usr/bin/sh
+
+declare -A profiles=([work]=qutebrowser [personal]=qutebrowser [misc]=firefox-developer-edition)
+
+profiles_dir="$HOME/.local/share/browsers"
+[ ! -e "$profiles_dir" ] && mkdir -p "$profiles_dir"
+
+run() {
+    profile_dir="$profiles_dir/$1"
+    browser="${profiles[$1]}"
+    [ ! -e "$profile_dir" ] && mkdir -p "$profile_dir"
+
+    case $browser in
+        qutebrowser) /usr/bin/qutebrowser --restore default -B "$profile_dir"
+            ;;
+        firefox*)
+            eval $browser --profile "$profile_dir"
+            ;;
+        *)
+            echo "can't find profile $1"
+            exit 1
+            ;;
+    esac
+}
+
+run $@
