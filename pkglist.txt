@@ -53,6 +53,7 @@ ghc-static
 gimp
 git
 go
+google-chrome
 gparted
 grep
 groff

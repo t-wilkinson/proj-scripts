@@ -1,26 +1,36 @@
 #!/usr/bin/sh
 
-declare -A profiles=([work]=qutebrowser [personal]=qutebrowser [misc]=firefox-developer-edition)
-
 profiles_dir="$HOME/.local/share/browsers"
 [ ! -e "$profiles_dir" ] && mkdir -p "$profiles_dir"
 
 run() {
-    profile_dir="$profiles_dir/$1"
-    browser="${profiles[$1]}"
-    [ ! -e "$profile_dir" ] && mkdir -p "$profile_dir"
+    browser="$1"
+    profile_dir="$2"
 
     case $browser in
-        qutebrowser) /usr/bin/qutebrowser --restore default -B "$profile_dir"
+        qutebrowser) qutebrowser --restore default -B "$profile_dir"
             ;;
         firefox*)
-            eval $browser --profile "$profile_dir"
-            ;;
-        *)
-            echo "can't find profile $1"
-            exit 1
+            eval "$browser" --profile "$profile_dir"
             ;;
     esac
 }
 
-run $@
+# config is file with lines formatted as follows `profile=browser`
+config=${BROWSER_CONFIG:-"$HOME/.config/browser/config"}
+[ ! -e "$config" ] && mkdir -p $(dirname "$config") && touch "$config"
+
+while IFS= read -r line; do
+    read profile browser <<< $(tr '=' ' ' <<< "$line")
+
+    if [[ "$profile" == "$1" ]]; then
+        profile_dir="$profiles_dir/$profile"
+        [ ! -e "$profile_dir" ] && mkdir -p "$profile_dir"
+        run "$browser" "$profile_dir"
+        exit 0
+    fi
+done < "$config"
+
+echo "can't find profile $1"
+rmdir "$profile_dir"
+exit 1
