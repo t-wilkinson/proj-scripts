@@ -1,4 +1,8 @@
 #!/usr/bin/env python
+"""Normalize strings
+If passed as command line arguments, interpret as files/directories to move.
+If stdin, print the normalized version.
+"""
 import sys
 import re
 import unicodedata
@@ -26,20 +30,19 @@ def normalize_file(path):
         os.renames(path, normalized)
 
 
-if __name__ == '__main__':
-    # if passing args, move files
-    if len(sys.argv) > 1:
-        paths = sys.argv[1:]
-        for path in paths:
-            if os.path.isdir(path):
-                for root, dirs, files in os.walk(path):
-                    for file in files:
-                        normalize_file(os.path.join(root, file))
+# if passing args, move files
+if len(sys.argv) > 1:
+    paths = sys.argv[1:]
+    for path in paths:
+        if os.path.isdir(path):
+            for root, dirs, files in os.walk(path):
+                for file in files:
+                    normalize_file(os.path.join(root, file))
 
-            else:
-                normalize_file(path)
+        else:
+            normalize_file(path)
 
-    # if stdin, print normalized versions of strings
-    else:
-        for line in sys.stdin:
-            print(normalize(line))
+# if stdin, print normalized versions of strings
+else:
+    for line in sys.stdin:
+        print(normalize(line))

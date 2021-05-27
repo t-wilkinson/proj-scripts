@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+"""Manage your git repositories with this CLI
+"""
 import argparse
 import os
 import os.path as path
