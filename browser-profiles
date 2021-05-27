@@ -1,6 +1,6 @@
 #!/usr/bin/sh
 
-profiles_dir="$HOME/.local/share/browsers"
+profiles_dir="$HOME/.local/share/browser-profiles"
 [ ! -e "$profiles_dir" ] && mkdir -p "$profiles_dir"
 
 run() {
@@ -17,7 +17,7 @@ run() {
 }
 
 # config is file with lines formatted as follows `profile=browser`
-config=${BROWSER_CONFIG:-"$HOME/.config/browser/config"}
+config=${BROWSER_CONFIG:-"$HOME/.config/browser-profiles/config"}
 [ ! -e "$config" ] && mkdir -p $(dirname "$config") && touch "$config"
 
 while IFS= read -r line; do

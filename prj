@@ -15,20 +15,20 @@ signal(SIGPIPE, SIG_DFL)
 logging.basicConfig(level=logging.WARNING)
 
 
-def default_proj(author, repository):
+def default_prj(author, repository):
     return {
         'tags': [], 'aliases': [],
         'author': author, 'repository': repository}
 
 
 def init_config_file():
-    config_file = os.environ.get('PROJ_CONFIG', path.expanduser(
-        '~/.config/proj/config.toml'))
+    config_file = os.environ.get('PRJ_CONFIG', path.expanduser(
+        '~/.config/prj/config.toml'))
     if not path.isfile(config_file):
         os.makedirs(path.dirname(config_file))
         with open(config_file, 'w') as f:
             config = {
-                f'{author}/{repository}': default_proj(author, repository)
+                f'{author}/{repository}': default_prj(author, repository)
                 for author in os.listdir(project_dir)
                 for repository in os.listdir(path.join(project_dir, author))
             }
@@ -37,7 +37,7 @@ def init_config_file():
 
 
 def init_project_dir():
-    project_dir = os.environ.get('PROJ_DIR', path.expanduser('~/dev'))
+    project_dir = os.environ.get('PRJ_DIR', path.expanduser('~/dev'))
     if not path.isdir(project_dir):
         os.makedirs(project_dir)
     return project_dir
@@ -47,8 +47,8 @@ project_dir = init_project_dir()
 config_file = init_config_file()
 
 
-def full_path(proj):
-    return path.join(project_dir, proj)
+def full_path(prj):
+    return path.join(project_dir, prj)
 
 
 def logger(func):
@@ -64,15 +64,15 @@ def logger(func):
 def flatten_project(project):
     flattened = []
 
-    def flatten(proj):
-        if isinstance(proj, list):
-            for v in proj:
+    def flatten(prj):
+        if isinstance(prj, list):
+            for v in prj:
                 flatten(v)
-        elif isinstance(proj, dict):
-            for v in proj.values():
+        elif isinstance(prj, dict):
+            for v in prj.values():
                 flatten(v)
         else:
-            flattened.append(proj)
+            flattened.append(prj)
     flatten(project)
 
     return flattened
@@ -81,13 +81,13 @@ def flatten_project(project):
 @logger
 def search_projects(config, search=None, author=None, repository=None):
     matches = []
-    for key, proj in config.items():
-        if author != None and proj['author'] != author:
+    for key, prj in config.items():
+        if author != None and prj['author'] != author:
             continue
-        if repository != None and proj['repository'] != repository:
+        if repository != None and prj['repository'] != repository:
             continue
 
-        terms = ':'.join(flatten_project(proj))
+        terms = ':'.join(flatten_project(prj))
         if search is None:
             matches.append(key)
         elif re.search(search, terms):
@@ -116,7 +116,7 @@ def run_update(args, old_config):
             if key in old_config:
                 config[key] = old_config[key]
             else:
-                config[key] = default_proj(author, repository)
+                config[key] = default_prj(author, repository)
 
     with open(config_file, 'w') as f:
         toml.dump(config, f)
@@ -124,13 +124,13 @@ def run_update(args, old_config):
 
 @logger
 def run_ls(args, config):
-    def print_projs(projs):
+    def print_prjs(prjs):
         results = []
-        for i, proj in enumerate(projs):
+        for i, prj in enumerate(prjs):
             if args.full:
-                results.append(full_path(proj))
+                results.append(full_path(prj))
             else:
-                results.append(proj)
+                results.append(prj)
             if args.number:
                 results[-1] = f'{i} {results[-1]}'
         print('\n'.join(results))
@@ -147,7 +147,7 @@ def run_ls(args, config):
         else:
             print(full_path(projects[-1]))
     else:
-        print_projs(projects)
+        print_prjs(projects)
 
 
 @logger
