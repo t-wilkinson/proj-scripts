@@ -8,7 +8,7 @@ import sys
 import toml
 import logging
 
-# handle SIGPIPE
+# dont exit on SIGPIPE
 from signal import signal, SIGPIPE, SIG_DFL
 signal(SIGPIPE, SIG_DFL)
 
@@ -152,12 +152,15 @@ def run_ls(args, config):
 
 @logger
 def run_fzf(args, config):
-    # TODO: learn about subprocess
     search = {k: v for k, v in vars(args).items() if k in [
         'search', 'author', 'repository']}
-    projects = map(full_path, config.keys())
-    process = subprocess.run('fzf', stdin=sys.stdout, shell=True)
-    print('\n'.join(projects), file=process.stdin)
+    projects = config.keys()
+
+    with subprocess.Popen('fzf', stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True) as process:
+        (project, stderr) = process.communicate(input='\n'.join(projects))
+
+    project = project.rstrip('\n')
+    print(full_path(project))
 
 
 @logger
@@ -222,8 +225,8 @@ if __name__ == '__main__':
 
     parse_line_num()
     parsers['ls'].add_argument('search', nargs="?", default=None)
-    parsers['ls'].add_argument('-t', '--tag', nargs="*", type=str)
-    parsers['ls'].add_argument('--alias', nargs="*", type=str)
+    parsers['ls'].add_argument('-t', '--tag', nargs="+", type=str)
+    parsers['ls'].add_argument('--alias', nargs="+", type=str)
     parsers['ls'].add_argument('-n', '--number', action='store_true')
     parsers['ls'].add_argument('-l', '--line', type=int)
     parsers['ls'].add_argument('-a', '--author')
