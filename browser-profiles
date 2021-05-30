@@ -6,12 +6,13 @@ profiles_dir="$HOME/.local/share/browser-profiles"
 run() {
     browser="$1"
     profile_dir="$2"
+    shift; shift;
 
     case $browser in
-        qutebrowser) qutebrowser --restore default -B "$profile_dir"
+        qutebrowser) qutebrowser --restore default -B "$profile_dir" $@
             ;;
         firefox*)
-            eval "$browser" --profile "$profile_dir"
+            eval "$browser" --profile "$profile_dir" $@
             ;;
     esac
 }
@@ -26,7 +27,7 @@ while IFS= read -r line; do
     if [[ "$profile" == "$1" ]]; then
         profile_dir="$profiles_dir/$profile"
         [ ! -e "$profile_dir" ] && mkdir -p "$profile_dir"
-        run "$browser" "$profile_dir"
+        run "$browser" "$profile_dir" "$@"
         exit 0
     fi
 done < "$config"

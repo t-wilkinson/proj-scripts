@@ -183,14 +183,14 @@ def run_tag(args, config):
 
 @logger
 def run_add(args, config):
-    target_dir = f'{project_dir}/{args.author}/{args.repository}'
+    target_dir = f'{project_dir}/{args.repo}'
     if path.isdir(target_dir):
         sys.exit(1)
 
     process = subprocess.run([
         'git',
         'clone',
-        f'https://github.com/{args.author}/{args.repository}.git',
+        f'https://github.com/{args.repo}.git',
         target_dir,
     ])
     sys.exit(process.returncode)
@@ -237,8 +237,7 @@ if __name__ == '__main__':
         '-f', '--full', action='store_const', const=True)
     parsers['ls'].set_defaults(func=run_ls)
 
-    parsers['add'].add_argument('author')
-    parsers['add'].add_argument('repository')
+    parsers['add'].add_argument('repo', metavar='AUTHOR/REPOSITORY')
     parsers['add'].set_defaults(func=run_add)
 
     parsers['alias'].add_argument('project')
