@@ -2,13 +2,14 @@
 """Manage your git repositories with this CLI
 """
 import argparse
+import logging
 import os
 import os.path as path
 import re
+import shutil
 import subprocess
 import sys
-import toml
-import logging
+import toml  # lets just use json
 
 # dont exit on SIGPIPE
 from signal import signal, SIGPIPE, SIG_DFL
@@ -108,20 +109,20 @@ def search_project(*args, **kwargs):
 
 
 @logger
-def run_update(args, old_config):
+def run_update(args, config):
     authors = os.listdir(project_dir)
-    config = {}
+    new_config = {}
 
     for author in authors:
         for repository in os.listdir(path.join(project_dir, author)):
             key = f'{author}/{repository}'
-            if key in old_config:
-                config[key] = old_config[key]
+            if key in config:
+                new_config[key] = config[key]
             else:
-                config[key] = default_prj(author, repository)
+                new_config[key] = default_prj(author, repository)
 
     with open(config_file, 'w') as f:
-        toml.dump(config, f)
+        toml.dump(new_config, f)
 
 
 @logger
@@ -196,6 +197,14 @@ def run_add(args, config):
     sys.exit(process.returncode)
 
 
+@logger
+def run_rm(args, config):
+    path = f'{project_dir}/{args.repo}'
+    if os.path.isdir(path):
+        shutil.rmtree(path)
+    run_update(args, config)
+
+
 def parse_line_num():
     ''' accept args like `-n`'''
     line_num_re = re.compile(r'^-[0-9]+$')
@@ -247,6 +256,9 @@ if __name__ == '__main__':
     parsers['tag'].add_argument('project')
     parsers['tag'].add_argument('value')
     parsers['tag'].set_defaults(func=run_tag)
+
+    parsers['rm'].add_argument('repo', metavar='AUTHOR/REPOSITORY')
+    parsers['rm'].set_defaults(func=run_rm)
 
     parsers['fzf'].set_defaults(func=run_fzf)
 
