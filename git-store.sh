@@ -1,8 +1,7 @@
 #!/bin/sh
+# Uses `pass` to store github username and token
+# To use this to store your credentials, run:
+# `git config --global credential.helper $HOME/<location of git-store.sh>`
 
-if [[ $1 != get ]]; then
-    # only show information on get
-    exit 0
-fi
+[ ! $1 = 'get' ] && exit 0
 pass ls github.credentials.t-wilkinson
-
