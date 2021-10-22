@@ -11,6 +11,9 @@ run() {
     case $browser in
         qutebrowser) exec qutebrowser --restore default -B "$profile_dir" $args
             ;;
+        *chrome*)
+            exec "$browser" --user-data-dir="$profile_dir" $args
+            ;;
         firefox*)
             exec "$browser" --profile "$profile_dir" $args
             ;;

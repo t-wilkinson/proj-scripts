@@ -10,6 +10,7 @@ def get_screens():
     return screens
 
 
-screens = get_screens()  # [HDMI-*, eDP-*]
+subprocess.run(['xrandr', '--auto'])
+screens = get_screens()
 subprocess.run(['xrandr', '--output', screens[1],
                 '--below', screens[0], '--primary'])
